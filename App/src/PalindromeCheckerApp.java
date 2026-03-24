@@ -1,8 +1,9 @@
 import java.util.Scanner;
+import java.util.Stack;
 
 public class PalindromeCheckerApp {
 
-    public static class UseCase11PalindromeCheckerApp {
+    public static class UseCase12PalindromeCheckerApp {
 
         public static void main(String[] args) {
             Scanner sc = new Scanner(System.in);
@@ -10,8 +11,10 @@ public class PalindromeCheckerApp {
             System.out.print("Enter a string: ");
             String input = sc.nextLine();
 
-            PalindromeService service = new PalindromeService();
-            boolean result = service.checkPalindrome(input);
+            PalindromeStrategy strategy = new StackStrategy();
+            PalindromeContext context = new PalindromeContext(strategy);
+
+            boolean result = context.execute(input);
 
             if (result) {
                 System.out.println("The string is a Palindrome.");
@@ -23,21 +26,38 @@ public class PalindromeCheckerApp {
         }
     }
 
-    static class PalindromeService {
+    interface PalindromeStrategy {
+        boolean check(String input);
+    }
 
-        public boolean checkPalindrome(String input) {
-            String normalized = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-            int start = 0;
-            int end = normalized.length() - 1;
+    static class StackStrategy implements PalindromeStrategy {
 
-            while (start < end) {
-                if (normalized.charAt(start) != normalized.charAt(end)) {
+        public boolean check(String input) {
+            String s = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+            Stack<Character> stack = new Stack<>();
+
+            for (char c : s.toCharArray()) {
+                stack.push(c);
+            }
+
+            for (char c : s.toCharArray()) {
+                if (c != stack.pop()) {
                     return false;
                 }
-                start++;
-                end--;
             }
             return true;
+        }
+    }
+
+    static class PalindromeContext {
+        private PalindromeStrategy strategy;
+
+        public PalindromeContext(PalindromeStrategy strategy) {
+            this.strategy = strategy;
+        }
+
+        public boolean execute(String input) {
+            return strategy.check(input);
         }
     }
 }
